@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link href="css/login.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div class="container animated bounceInDown">
+    <h2 class="header"><strong>趣编程</strong> | 让学习成为一种乐趣</h2>
+    <ul class="navs">
+        <li class="nav active">注册登录</li><!--
+		--><li class="nav">密码登录</li>
+    </ul>
+    <div class="forms top-radius-0">
+        <form class="form active">
+            <div class="input-group">
+                <input type="text" class="name1" placeholder="请输入注册用户名" />
+            </div>
+            <div class="input-group">
+                <input type="password" class="password1" placeholder="请输入密码" />
+            </div>
+            <label class="has-error password-error">密码不能为空！</label>
+
+            <div class="input-group">
+                <input type="text" class="mobile" placeholder="请输入手机号" />
+            </div>
+            <label class="has-error mobile-error">手机号格式不正确！</label>
+            <div class="input-group">
+                <input type="text" class="auth-code" placeholder="请输入验证码" /><!--
+				--><button type="button" class="send-btn" disabled>获取验证码</button>
+            </div>
+            <label class="has-error auth-code-error">验证码不能为空！</label>
+            <div class="input-group checkbox">
+                <input type="checkbox" id="checkbox1"><!--
+				--><label for="checkbox1">两周内免登录</label>
+            </div>
+            <button type="button" class="login-btn" disabled>
+                注册
+            </button>
+        </form>
+        <form class="form">
+            <div class="input-group">
+                <input type="text" class="mobile" placeholder="请输入手机号" />
+            </div>
+            <label class="has-error mobile-error">手机号格式不正确！</label>
+            <div class="input-group">
+                <input type="password" class="password" placeholder="请输入密码" />
+            </div>
+            <label class="has-error password-error">密码不能为空！</label>
+            <div class="input-group checkbox">
+                <input type="checkbox" id="checkbox2"><!--
+				--><label for="checkbox2">两周内免登录</label>
+            </div>
+            <button type="submit" class="login-btn" disabled>
+                登录
+            </button>
+        </form>
+    </div>
+    <div class="footer">
+        奇迹空间（北京）科技有限公司 @ 2017 趣编程
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+<script>
+    const nav = document.getElementsByClassName('nav');
+    const name1 = document.getElementsByClassName('name1')[0];
+    const password1 = document.getElementsByClassName('password1')[0];
+    const forms = document.getElementsByClassName('forms')[0];
+    const form = document.getElementsByClassName('form');
+    const mobile = document.getElementsByClassName('mobile');
+    const sendBtn = document.getElementsByClassName('send-btn')[0];
+    const loginBtn = document.getElementsByClassName('login-btn');
+    const authCode = document.getElementsByClassName('auth-code')[0];
+    const password = document.getElementsByClassName('password')[0];
+    const mobileError = document.getElementsByClassName('mobile-error');
+    const authCodeError = document.getElementsByClassName('auth-code-error')[0];
+    const passwordError = document.getElementsByClassName('password-error')[0];
+
+    const mobileReg = new RegExp('^1[3-9][0-9]{9}$', 'g');
+    let tryed = false;
+    let countDownValue = 60;
+
+    nav[0].addEventListener('click', () => {
+        toggleTab(0);
+    });
+    nav[1].addEventListener('click', () => {
+        toggleTab(1);
+    });
+    mobile[0].addEventListener('keyup', () => {
+        checkSendValid();
+        checkLoginValid(0);
+        if (tryed) {
+            checkMobileValid(0);
+        }
+    });
+    mobile[1].addEventListener('keyup', () => {
+        checkLoginValid(1);
+        if (tryed) {
+            checkMobileValid(1);
+        }
+    });
+    authCode.addEventListener('keyup', () => {
+        checkSendValid();
+        checkLoginValid(0);
+        if (tryed) {
+            checkAuthCodeValid();
+        }
+    });
+    password.addEventListener('keyup', () => {
+        checkLoginValid(1);
+        if (tryed) {
+            checkPasswordValid();
+        }
+    });
+    password1.addEventListener('keyup', () => {
+        checkLoginValid(0);
+    });
+    name1.addEventListener('keyup', () => {
+        checkLoginValid(0);
+    });
+    sendBtn.addEventListener('click', () => {
+        if (mobile[0].value.match(mobileReg)) {
+            alert("获取验证码")
+            $.get(
+                "http://localhost:8080/admin/SendCode/"+123,
+                function () {
+                    location.href="login.html"
+                }
+            )
+            countDown();
+        }
+    });
+    loginBtn[0].addEventListener('click', () => {
+        tryed = true;
+        alert(`用户名：${name1.value}\n密码：${password1.value}\n手机号：${mobile[0].value}\n验证码：${authCode.value}`);
+
+
+    });
+    loginBtn[1].addEventListener('click', () => {
+        tryed = true;
+        alert(`手机号：${mobile[1].value}\n密码：${password.value}`);
+    });
+
+    function toggleTab (i) {
+        const j = i === 1 ? 0 : 1;
+
+        removeClass(nav[j], 'active');
+        removeClass(form[j], 'active');
+        removeClass(forms, `top-radius-${j}`);
+
+        addClass(nav[i], 'active');
+        addClass(form[i], 'active');
+        addClass(forms, `top-radius-${i}`);
+    }
+
+    function checkSendValid () {
+        let btn = true;
+        if (mobile[0].value.match(mobileReg)&&name1.value.length!=0&&password1.value.length!=0) {
+            btn = false;
+        }
+        sendBtn.disabled = btn;
+    }
+
+    function checkLoginValid (i) {
+        let btn = true;
+        if (mobile[i].value.match(mobileReg)) {
+            if ((i === 0 && authCode.value&&name1.value.length!=0&&password1.value.length!=0) || (i === 1 && password.value)) {
+                btn = false;
+            }
+        }
+        loginBtn[i].disabled = btn;
+    }
+
+    function checkMobileValid (i) {
+        if (mobile[i].value.match(mobileReg)) {
+            removeClass(mobileError[i], 'shown');
+        } else if (!mobileError[i].className.match(/ shown/g)) {
+            addClass(mobileError[i], 'shown');
+        }
+    }
+
+    function checkAuthCodeValid () {
+        if (authCode.value) {
+            removeClass(authCodeError, 'shown');
+        } else if (!authCodeError.className.match(/ shown/g)) {
+            addClass(authCodeError, 'shown');
+        }
+    }
+
+    function checkPasswordValid () {
+        if (password.value) {
+            removeClass(passwordError, 'shown');
+        } else if (!passwordError.className.match(/ shown/g)) {
+            addClass(passwordError, 'shown');
+        }
+    }
+
+    function countDown () {
+        if (countDownValue <= 0) {
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = '获取验证码'
+            countDownValue = 60;
+            return;
+        }
+
+        sendBtn.disabled = true;
+        sendBtn.innerHTML = `${countDownValue} 秒后重试`;
+
+        setTimeout(() => {
+            --countDownValue;
+            countDown();
+        }, 1000);
+    }
+
+    function removeClass (obj, cls) {
+        const reg = new RegExp(`${cls}`, 'g');
+        obj.className = obj.className.replace(reg, '')
+    }
+
+    function addClass (obj, cls) {
+        obj.className += ` ${cls}`;
+    }
+
+</script>
+</body>
+</html>
